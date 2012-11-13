@@ -1,0 +1,72 @@
+<!doctype html>
+<meta charset='utf-8'>
+<title>multitouch demo</title>
+<meta name='viewport' content='width=device-width'>
+<style type='text/css'>
+body {
+  font-size: xx-large;
+  height: 100%;
+  width:  100%;
+}
+body.ready {
+  background: red;
+}
+body.go {
+  background: lime;
+}
+</style>
+<script>
+(function() {
+
+var timer = {
+  _current: null,
+  _start: 0,
+  _maxTouch: 0,
+
+  _touchstart: function timer__touchstart(evt) {
+    evt.preventDefault();
+    this._maxTouch = Math.max(this._maxTouch, evt.touches.length);
+    if (evt.touches.length >= 2) {
+      if (this._current) {
+        document.body.classList.remove('go');
+        clearInterval(this._current);
+      } else {
+        document.body.classList.add('ready');
+      }
+    }
+  },
+  _touchend: function timer__touchend(evt) {
+    evt.preventDefault();
+    if (evt.touches.length === 0 && this._maxTouch >= 2) {
+      this._maxTouch = 0;
+      if (this._current) {
+        this._current = null;
+      } else {
+        document.body.classList.remove('ready');
+        this._current = setInterval(this.update, 25);
+        this._start = Date.now();
+        document.body.classList.add('go');
+      }
+    }
+  },
+
+  _update: function timer__update() {
+    document.body.innerHTML = (Date.now() - this._start) / 1000;
+  },
+
+  init: function timer_init(evt) {
+    this.touchstart = this._touchstart.bind(this);
+    this.touchend   = this._touchend.bind(this);
+    this.update     = this._update.bind(this);
+
+    document.addEventListener('touchstart', this.touchstart, false);
+    document.addEventListener('touchend', this.touchend, false);
+  }
+}
+
+window.addEventListener('load', timer.init.bind(timer), false);
+
+})();
+</script>
+<body>
+</body>
